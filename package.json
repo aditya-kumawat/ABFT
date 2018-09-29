@@ -1,0 +1,24 @@
+{
+  "name": "modified-pbft",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "socket.io": "^2.1.1",
+    "socket.io-client": "^2.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aditya19496/Modified-PBFT.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aditya19496/Modified-PBFT/issues"
+  },
+  "homepage": "https://github.com/aditya19496/Modified-PBFT#readme"
+}

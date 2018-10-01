@@ -8,6 +8,10 @@ function requestData(data) {
 	socket.emit('requestData', data);
 }
 
+function pbft() {
+	socket.emit('pbft');
+}
+
 socket.on('requestData', (data) => {
 	var d = new Date();
 	var t = d.getTime();

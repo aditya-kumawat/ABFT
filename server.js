@@ -23,4 +23,31 @@ io.on('connection', function (socket) {
 		data.timestamp = d.getTime();
 		io.in('primary').emit('requestData', data);
 	})
+
+	socket.on('pbft', () => {
+		PBFT();
+	})
 });
+
+
+var faultyNodes = 1;
+var totalNodes = 3*faultyNodes + 1;
+var primaryNodes = 1;
+var replicaNodes = 3*faultyNodes;
+
+var checkNodes = () => {
+	var p = io.sockets.adapter.rooms['primary'].length;
+	var r = io.sockets.adapter.rooms['replica'].length;
+	if(p==primaryNodes && r==replicaNodes && totalNodes==p+r)
+		return true;
+	else 
+		return false;
+}
+
+var PBFT = () => {
+	if(checkNodes()) {
+		console.log('Continue');
+	} else {
+		console.log("Nodes missing");
+	}
+}

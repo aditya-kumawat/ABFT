@@ -16,6 +16,13 @@
 		<div>
 			<h2>Transfer Data</h2>
 			<button onClick="requestData({from: 'client', to: 'primary'})">Client to Primary</button>
+			<button onClick="requestData({from: 'primary', to: 'replica'})">Primary to Replica</button>
+			<button onClick="requestData({from: 'replica', to: 'primary'})">Replica to Primary</button>
+			<button onClick="requestData({from: 'primary', to: 'client'})">Primary to Client</button>
+		</div>
+		<div>
+			<h2>Algorithm</h2>
+			<button onClick="pbft()">PBFT</button>
 		</div>
 	</body>
 </html>

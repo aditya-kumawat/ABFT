@@ -12,8 +12,13 @@ function pbft() {
 	socket.emit('pbft');
 }
 
-socket.on('requestData', (data) => {
+socket.on('requestPrimary', (data, callback) => {
 	var d = new Date();
 	var t = d.getTime();
 	console.log(data.from + " -> " + data.to + " --- " + (t-data.timestamp));
+	callback(data, t);
+})
+
+socket.on('requestReplica', (data, callback) => {
+	callback();
 })

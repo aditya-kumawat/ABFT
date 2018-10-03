@@ -29,7 +29,6 @@ io.on('connection', function (socket) {
 	})
 });
 
-
 var faultyNodes = 1;
 var totalNodes = 3*faultyNodes + 1;
 var primaryNodes = 1;
@@ -44,9 +43,27 @@ var checkNodes = () => {
 		return false;
 }
 
+var startTime;
+
+function PtoR(time) {
+
+}
+
+function CtoP(data, time) {
+	console.log("Client to primary - " + time);
+	// io.in('replica').emit('requestReplica', data, PtoR);
+}
+
 var PBFT = () => {
 	if(checkNodes()) {
-		console.log('Continue');
+		var d = new Date();
+		var t = d.getTime();
+		startTime = t;
+		var data = {
+			from: 'client',
+			to : 'primary',
+		}
+		io.in('primary').emit('requestPrimary', data, CtoP);
 	} else {
 		console.log("Nodes missing");
 	}

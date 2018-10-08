@@ -11,37 +11,10 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/index.html');
 });
 
-
 var faultyNodes = 1;
 var totalNodes = 3*faultyNodes + 1;
 var primaryNodes = 1;
 var replicaNodes = 3*faultyNodes;
-var startTime;
-
-var nodes = {
-	'client': [],
-	'primary': [],
-	'replica': []
-}
-
-// var checkNodes = () => {
-// 	var p = io.sockets.adapter.rooms['primary'].length;
-// 	var r = io.sockets.adapter.rooms['replica'].length;
-// 	if(p==primaryNodes && r==replicaNodes && totalNodes==p+r)
-// 		return true;
-// 	else 
-// 		return false;
-// }
-
-
-// function PtoR(time) {
-
-// }
-
-// function CtoP(data, time) {
-	// console.log("Client to primary - " + time);
-	// io.in('replica').emit('requestReplica', data, PtoR);
-// }
 
 var getTime = () => {
 	var d = new Date();
@@ -50,58 +23,54 @@ var getTime = () => {
 }
 
 var sendData = (data, emitType) => {
-	for(var u of nodes[data.from]) {
-		for(var v of nodes[data.to]) {
-			data.u = u;
-			data.v = v;
-			// console.log(data);
-			io.to(v).emit(emitType, data);
-		}
-	}
+	io.to(data.from).emit(emitType, data);
 }
 
-var PBFT = () => {
-	if(checkNodes()) {
-		var d = new Date();
-		var t = d.getTime();
-		startTime = t;
-		var data = {
-			from: 'client',
-			to : 'primary',
-		}
-		io.in('primary').emit('requestPrimary', data, CtoP);
-	} else {
-		console.log("Nodes missing");
-	}
+var receiveData = (data, emitType) => {
+	io.to(data.to).emit(emitType, data);
 }
 
 io.on('connection', function (socket) {
 	socket.on('addNode', (data) => {
-		nodes[data.type].push(socket.id);
-		console.log(nodes);
+		socket.join(data.type);
 	})
 
-	socket.on('request', () => {
+	socket.on('requestS', () => {
 		var t = getTime();
 		var data = {
 			from: 'client',
 			to: 'primary',
-			sTime: t,
 		};
-		sendData(data, 'request');
+		sendData(data, 'requestS');
 	})
 
-	socket.on('prePrepare', () => {
+	socket.on('requestR', (data) => {
+		receiveData(data, 'requestR');
+	})
+
+	socket.on('prePrepareS', () => {
 		var t = getTime();
 		var data = {
 			from: 'primary',
 			to: 'replica',
-			sTime: t,
 		};
-		sendData(data, 'prePrepare');
+		sendData(data, 'prePrepareS');
 	})
 
-	socket.on('pbft', () => {
-		PBFT();
+	socket.on('prePrepareR', (data) => {
+		receiveData(data, 'prePrepareR');
 	})
+
+	socket.on('prepareS', () => {
+		var t = getTime();
+		var data = {
+			from: 'replica',
+			to: 'replica',
+		};
+		sendData(data, 'prepareS');
+	})
+
+	socket.on('prepareR', (data) => {
+		receiveData(data, 'prepareR');
+	})	
 });

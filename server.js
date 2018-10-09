@@ -64,7 +64,7 @@ io.on('connection', function (socket) {
 	})
 
 	socket.on('prepareR', (data) => {
-		io.to(data.to[0]).to(data.to[1]).emit('prepareR', data);
+		socket.to(data.to[0]).to(data.to[1]).emit('prepareR', data);
 	})
 
 	socket.on('commitS', () => {
@@ -72,11 +72,25 @@ io.on('connection', function (socket) {
 		var data = {
 			from: ['primary', 'replica'],
 			to: ['primary', 'replica'],
+			payload: "Hello World",
 		};
 		io.in(data.from[0]).in(data.from[1]).emit('commitS', data);
 	})
 
 	socket.on('commitR', (data) => {
 		io.in(data.to[0]).in(data.to[1]).emit('commitR', data);
+	})
+
+	socket.on('replyS', () => {
+		var t = getTime();
+		var data = {
+			from: ['primary', 'replica'],
+			to: 'client',
+		};
+		io.to(data.from[0]).to(data.from[1]).emit('replyS', data);
+	})
+
+	socket.on('replyR', (data) => {
+		io.to(data.to).emit('replyR', data);
 	})
 });

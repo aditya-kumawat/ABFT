@@ -1,6 +1,7 @@
 var socket = io('http://localhost');
 
-var rData = new Set();
+var val = new Set();
+var payload = new Set();
 
 var getTime = () => {
 	var d = new Date();
@@ -26,6 +27,10 @@ function prepare() {
 
 function commit() {
 	socket.emit('commitS');
+}
+
+function reply() {
+	socket.emit('replyS');
 }
 
 socket.on('requestS', (data) => {
@@ -61,22 +66,37 @@ socket.on('prepareS', (data) => {
 socket.on('prepareR', (data) => {
 	data.rTime = getTime();
 	data.v = socket.id;
-	rData.add(data.val);
+	val.add(data.val);
 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + (data.rTime - data.sTime));
 })
 
 socket.on('commitS', (data) => {
 	data.sTime = getTime();
 	data.u = socket.id;
-	socket.emit('commitR', data);
+	if(val.size==1) {
+		socket.emit('commitR', data);
+	}
 })
 
 socket.on('commitR', (data) => {
 	data.rTime = getTime();
 	data.v = socket.id;
-	if(rData.size==1) {
-		console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + (data.rTime - data.sTime));
+	payload.add(data.payload);
+	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + (data.rTime - data.sTime));
+})
+
+socket.on('replyS', (data) => {
+	data.sTime = getTime();
+	data.u = socket.id;
+	if(payload.size==1) {
+		socket.emit('replyR', data);
 	}
+})
+
+socket.on('replyR', (data) => {
+	data.rTime = getTime();
+	data.v = socket.id;
+	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + data.payload + " ----- " + (data.rTime - data.sTime));
 })
 
 // socket.on('request', (data) => {

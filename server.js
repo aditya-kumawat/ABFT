@@ -22,14 +22,6 @@ var getTime = () => {
 	return t;
 }
 
-var sendData = (data, emitType) => {
-	io.to(data.from).emit(emitType, data);
-}
-
-var receiveData = (data, emitType) => {
-	io.to(data.to).emit(emitType, data);
-}
-
 io.on('connection', function (socket) {
 	socket.on('addNode', (data) => {
 		socket.join(data.type);
@@ -41,11 +33,11 @@ io.on('connection', function (socket) {
 			from: 'client',
 			to: 'primary',
 		};
-		sendData(data, 'requestS');
+		io.to(data.from).emit('requestS', data);
 	})
 
 	socket.on('requestR', (data) => {
-		receiveData(data, 'requestR');
+		io.to(data.to).emit('requestR', data);
 	})
 
 	socket.on('prePrepareS', () => {
@@ -54,23 +46,37 @@ io.on('connection', function (socket) {
 			from: 'primary',
 			to: 'replica',
 		};
-		sendData(data, 'prePrepareS');
+		io.to(data.from).emit('prePrepareS', data);
 	})
 
 	socket.on('prePrepareR', (data) => {
-		receiveData(data, 'prePrepareR');
+		io.to(data.to).emit('prePrepareR', data);
 	})
 
 	socket.on('prepareS', () => {
 		var t = getTime();
 		var data = {
 			from: 'replica',
-			to: 'replica',
+			to: ['primary', 'replica'],
+			val: 1,
 		};
-		sendData(data, 'prepareS');
+		io.to(data.from).emit('prepareS', data);
 	})
 
 	socket.on('prepareR', (data) => {
-		receiveData(data, 'prepareR');
-	})	
+		io.to(data.to[0]).to(data.to[1]).emit('prepareR', data);
+	})
+
+	socket.on('commitS', () => {
+		var t = getTime();
+		var data = {
+			from: ['primary', 'replica'],
+			to: ['primary', 'replica'],
+		};
+		io.in(data.from[0]).in(data.from[1]).emit('commitS', data);
+	})
+
+	socket.on('commitR', (data) => {
+		io.in(data.to[0]).in(data.to[1]).emit('commitR', data);
+	})
 });

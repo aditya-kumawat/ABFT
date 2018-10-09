@@ -1,6 +1,6 @@
 var socket = io('http://localhost');
 
-var rData = [];
+var rData = new Set();
 
 var getTime = () => {
 	var d = new Date();
@@ -22,6 +22,10 @@ function prePrepare() {
 
 function prepare() {
 	socket.emit('prepareS');
+}
+
+function commit() {
+	socket.emit('commitS');
 }
 
 socket.on('requestS', (data) => {
@@ -57,10 +61,21 @@ socket.on('prepareS', (data) => {
 socket.on('prepareR', (data) => {
 	data.rTime = getTime();
 	data.v = socket.id;
+	rData.add(data.val);
 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + (data.rTime - data.sTime));
-	rData.push(data);
-	/****/if(rData.length == 2) {
-		verifyData
+})
+
+socket.on('commitS', (data) => {
+	data.sTime = getTime();
+	data.u = socket.id;
+	socket.emit('commitR', data);
+})
+
+socket.on('commitR', (data) => {
+	data.rTime = getTime();
+	data.v = socket.id;
+	if(rData.size==1) {
+		console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + (data.rTime - data.sTime));
 	}
 })
 

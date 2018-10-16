@@ -100,7 +100,7 @@ io.on('connection', function (socket) {
 		var t = getTime();
 		var data = {
 			from: ['primary', 'replica'],
-			to: ['primary', 'replica', 'client'],
+			to: ['client', 'primary', 'replica'],
 			payload: 'Hello World',
 			totalNodes: totalNodes,
 		};

@@ -95,4 +95,19 @@ io.on('connection', function (socket) {
 	socket.on('replyR', (data) => {
 		io.to(data.to).emit('replyR', data);
 	})
+
+	socket.on('commitReplyS', () => {
+		var t = getTime();
+		var data = {
+			from: ['primary', 'replica'],
+			to: ['primary', 'replica', 'client'],
+			payload: 'Hello World',
+			totalNodes: totalNodes,
+		};
+		io.to(data.from[0]).to(data.from[1]).emit('commitReplyS', data);
+	})
+
+	socket.on('commitReplyR', (data) => {
+		io.to(data.to[0]).to(data.to[1]).to(data.to[2]).emit('commitReplyR', data);
+	})
 });

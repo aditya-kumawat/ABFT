@@ -35,6 +35,10 @@ function reply() {
 	socket.emit('replyS');
 }
 
+function commitReply() {
+	socket.emit('commitReplyS');
+}
+
 socket.on('requestS', (data) => {
 	data.sTime = getTime();
 	data.u = socket.id;
@@ -91,13 +95,29 @@ socket.on('replyS', (data) => {
 	data.sTime = getTime();
 	data.u = socket.id;
 	if(payload.size==1) {
-		// console.log(cData);
-		// console.log(cDataSet);
 		socket.emit('replyR', data);
 	}
 })
 
 socket.on('replyR', (data) => {
+	data.rTime = getTime();
+	data.v = socket.id;
+	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + data.payload + " ----- " + (data.rTime - data.sTime));
+	cData.push(data.payload);
+	cDataSet.add(data.payload);
+	if(cData.length==data.totalNodes && cDataSet.size==1) {
+		data.fTime = getTime();
+		console.log(data.payload + " ----- " + (data.fTime - data.sTime));
+	}
+})
+
+socket.on('commitReplyS', (data) => {
+	data.sTime = getTime();
+	data.u = socket.id;
+	socket.emit('commitReplyR', data);
+})
+
+socket.on('commitReplyR', (data) => {
 	data.rTime = getTime();
 	data.v = socket.id;
 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + data.payload + " ----- " + (data.rTime - data.sTime));

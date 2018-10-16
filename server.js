@@ -86,6 +86,8 @@ io.on('connection', function (socket) {
 		var data = {
 			from: ['primary', 'replica'],
 			to: 'client',
+			payload: 'Hello World',
+			totalNodes: totalNodes,
 		};
 		io.to(data.from[0]).to(data.from[1]).emit('replyS', data);
 	})

@@ -2,6 +2,8 @@ var socket = io('http://localhost');
 
 var val = new Set();
 var payload = new Set();
+var cData = new Array();
+var cDataSet = new Set();
 
 var getTime = () => {
 	var d = new Date();
@@ -89,6 +91,8 @@ socket.on('replyS', (data) => {
 	data.sTime = getTime();
 	data.u = socket.id;
 	if(payload.size==1) {
+		// console.log(cData);
+		// console.log(cDataSet);
 		socket.emit('replyR', data);
 	}
 })
@@ -97,25 +101,10 @@ socket.on('replyR', (data) => {
 	data.rTime = getTime();
 	data.v = socket.id;
 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + data.payload + " ----- " + (data.rTime - data.sTime));
+	cData.push(data.payload);
+	cDataSet.add(data.payload);
+	if(cData.length==data.totalNodes && cDataSet.size==1) {
+		data.fTime = getTime();
+		console.log(data.payload + " ----- " + (data.fTime - data.sTime));
+	}
 })
-
-// socket.on('request', (data) => {
-// 	data.rTime = getTime();
-// 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + (data.rTime - data.sTime));
-// })
-
-// socket.on('prePrepare', (data) => {
-// 	data.rTime = getTime();
-// 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + (data.rTime - data.sTime));
-// })
-
-// // socket.on('requestPrimary', (data, callback) => {
-// // 	var d = new Date();
-// // 	var t = d.getTime();
-// // 	console.log(data.from + " -> " + data.to + " --- " + (t-data.timestamp));
-// // 	callback(data, t);
-// // })
-
-// socket.on('requestReplica', (data, callback) => {
-// 	callback();
-// })

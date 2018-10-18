@@ -7,6 +7,10 @@ var payloadNoWait = new Array();
 var cData = new Array();
 var cDataSet = new Set();
 
+var prePrepareFlag = true;
+var commitFlag = true;
+var replyFlag = true;
+
 var getTime = () => {
 	var d = new Date();
 	var t = d.getTime();
@@ -41,7 +45,7 @@ function commitReply() {
 	socket.emit('commitReplyS');
 }
 
-function ABFT() {
+function abft() {
 	socket.emit('requestNoWaitS');
 }
 
@@ -136,7 +140,6 @@ socket.on('commitReplyR', (data) => {
 	}
 })
 
-
 socket.on('requestNoWaitS', (data) => {
 	data.sTime = getTime();
 	data.u = socket.id;
@@ -148,11 +151,6 @@ socket.on('requestNoWaitR', (data) => {
 	data.v = socket.id;
 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + (data.rTime - data.sTime));
 
-	request.emit('prePrepareNoWaitS');
-})
-
-socket.on('prePrepareNoWaitS', (data) => {
-	data.sTime = getTime();
 	data.u = socket.id;
 	socket.emit('prePrepareNoWaitR', data);
 })
@@ -162,28 +160,10 @@ socket.on('prePrepareNoWaitR', (data) => {
 	data.v = socket.id;
 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + (data.rTime - data.sTime));
 
-	socket.emit('prepareNoWaitS');
-})
-
-socket.on('prepareNoWaitS', (data) => {
-	data.sTime = getTime();
-	data.u = socket.id;
-	socket.emit('prepareNoWaitR', data);
-})
-
-socket.on('prepareNoWaitR', (data) => {
-	data.rTime = getTime();
-	data.v = socket.id;
 	valNoWait.push(data.val);
-	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + (data.rTime - data.sTime));
-
-	socket.emit('commitNoWaitS');
-})
-
-socket.on('commitNoWaitS', (data) => {
-	data.sTime = getTime();
 	data.u = socket.id;
-	if(valNoWait.length==data.totalNodes) {
+	if(prePrepareFlag==true && valNoWait.length==data.faultyNodes+1) {
+		prePrepareFlag = false;
 		socket.emit('commitNoWaitR', data);
 	}
 })
@@ -195,13 +175,9 @@ socket.on('commitNoWaitR', (data) => {
 	data.rTime = getTime();
 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + (data.rTime - data.sTime));
 
-	socket.emit('replyNoWaitS');
-})
-
-socket.on('replyNoWaitS', (data) => {
-	data.sTime = getTime();
 	data.u = socket.id;
-	if(payload.size==1 && payloadNoWait.length==data.totalNodes) {
+	if(commitFlag==true && payloadNoWait.length==data.faultyNodes+1) {
+		commitFlag = false;
 		socket.emit('replyNoWaitR', data);
 	}
 })
@@ -212,7 +188,8 @@ socket.on('replyNoWaitR', (data) => {
 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + data.payload + " ----- " + (data.rTime - data.sTime));
 	cData.push(data.payload);
 	cDataSet.add(data.payload);
-	if(cData.length==data.totalNodes && cDataSet.size==1) {
+	if(replyFlag==true && cData.length==data.faultyNodes+1 && cDataSet.size==1) {
+		replyFlag = false;
 		data.fTime = getTime();
 		console.log(data.payload + " ----- " + (data.fTime - data.sTime));
 	}

@@ -116,6 +116,7 @@ io.on('connection', function (socket) {
 		var data = {
 			from: 'client',
 			to: 'primary',
+			faultyNodes: faultyNodes,
 		};
 		io.to(data.from).emit('requestNoWaitS', data);
 	})
@@ -124,61 +125,24 @@ io.on('connection', function (socket) {
 		io.to(data.to).emit('requestNoWaitR', data);
 	})
 
-	socket.on('prePrepareNoWaitS', () => {
-		var t = getTime();
-		var data = {
-			from: 'primary',
-			to: 'replica',
-		};
-		io.to(data.from).emit('prePrepareNoWaitS', data);
-	})
-
 	socket.on('prePrepareNoWaitR', (data) => {
+		data.from = 'primary';
+		data.to = 'replica';
+		data.val = 1;
 		io.to(data.to).emit('prePrepareNoWaitR', data);
 	})
 
-	socket.on('prepareNoWaitS', () => {
-		var t = getTime();
-		var data = {
-			from: 'replica',
-			to: ['primary', 'replica'],
-			val: 1,
-			totalNodes: faultyNodes+1,
-		};
-		io.to(data.from).emit('prepareNoWaitS', data);
-	})
-
-	socket.on('prepareNoWaitR', (data) => {
-		socket.to(data.to[0]).to(data.to[1]).emit('prepareR', data);
-	})
-
-	socket.on('commitNoWaitS', () => {
-		var t = getTime();
-		var data = {
-			from: ['primary', 'replica'],
-			to: ['primary', 'replica'],
-			payload: "Hello World",
-			totalNodes: faultyNodes+1,
-		};
-		io.in(data.from[0]).in(data.from[1]).emit('commitNoWaitS', data);
-	})
-
 	socket.on('commitNoWaitR', (data) => {
-		io.in(data.to[0]).in(data.to[1]).emit('commitNoWaitR', data);
-	})
-
-	socket.on('replyNoWaitS', () => {
-		var t = getTime();
-		var data = {
-			from: ['primary', 'replica'],
-			to: 'client',
-			payload: 'Hello World',
-			totalNodes: totalNodes,
-		};
-		io.to(data.from[0]).to(data.from[1]).emit('replyNoWaitS', data);
+		data.from = 'replica';
+		data.to = 'primary';
+		data.payload = 'Hello World';
+		io.in(data.to).emit('commitNoWaitR', data);
 	})
 
 	socket.on('replyNoWaitR', (data) => {
+		data.from = 'primary';
+		data.to = 'client';
+		data.payload = 'Hello World';
 		io.to(data.to).emit('replyNoWaitR', data);
 	})
 });

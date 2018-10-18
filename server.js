@@ -145,4 +145,11 @@ io.on('connection', function (socket) {
 		data.payload = 'Hello World';
 		io.to(data.to).emit('replyNoWaitR', data);
 	})
+
+	socket.on('commitReplyNoWaitR', (data) => {
+		data.from = 'replica';
+		data.to = ['client', 'primary'];
+		data.payload = 'Hello World';
+		io.in(data.to[0]).in(data.to[1]).emit('commitReplyNoWaitR', data);
+	})
 });

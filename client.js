@@ -135,7 +135,7 @@ socket.on('commitReplyR', (data) => {
 	data.v = socket.id;
 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + data.payload + " ----- " + (data.rTime - data.sTime));
 
-	if(cData.length==data.totalNodes && cDataSet.size==1) {
+	if(cData.length==2*data.faultyNodes+1 && cDataSet.size==1) {
 		data.fTime = getTime();
 		console.log(data.payload + " ----- " + (data.fTime - data.sTime));
 	}
@@ -163,9 +163,10 @@ socket.on('prePrepareNoWaitR', (data) => {
 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + (data.rTime - data.sTime));
 
 	data.u = socket.id;
-	if(prePrepareFlag==true && valNoWait.length==data.faultyNodes+1) {
+	if(prePrepareFlag==true && valNoWait.length==2) {
 		prePrepareFlag = false;
-		socket.emit('commitNoWaitR', data);
+		// socket.emit('commitNoWaitR', data);
+		socket.emit('commitReplyNoWaitR', data);
 	}
 })
 
@@ -177,10 +178,9 @@ socket.on('commitNoWaitR', (data) => {
 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + (data.rTime - data.sTime));
 
 	data.u = socket.id;
-	if(commitFlag==true && payloadNoWait.length==data.faultyNodes+1) {
+	if(commitFlag==true && payload.size==1 && payloadNoWait.length==data.faultyNodes+1) {
 		commitFlag = false;
-		// socket.emit('replyNoWaitR', data);
-		socket.emit('commitReplyNoWaitR', data);
+		socket.emit('replyNoWaitR', data);
 	}
 })
 
@@ -191,7 +191,7 @@ socket.on('replyNoWaitR', (data) => {
 	data.v = socket.id;
 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + data.payload + " ----- " + (data.rTime - data.sTime));
 
-	if(replyFlag==true && cData.length==data.faultyNodes+1 && cDataSet.size==1) {
+	if(replyFlag==true && cData.length==2 && cDataSet.size==1) {
 		replyFlag = false;
 		data.fTime = getTime();
 		console.log(data.payload + " ----- " + (data.fTime - data.sTime));

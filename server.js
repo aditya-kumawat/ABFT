@@ -11,7 +11,7 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/index.html');
 });
 
-var faultyNodes = 1;
+var faultyNodes = 3;
 var totalNodes = 3*faultyNodes + 1;
 var primaryNodes = 1;
 var replicaNodes = 3*faultyNodes;
@@ -102,13 +102,13 @@ io.on('connection', function (socket) {
 			from: ['primary', 'replica'],
 			to: ['client', 'primary', 'replica'],
 			payload: 'Hello World',
-			totalNodes: totalNodes,
+			faultyNodes: faultyNodes,
 		};
 		io.to(data.from[0]).to(data.from[1]).emit('commitReplyS', data);
 	})
 
 	socket.on('commitReplyR', (data) => {
-		io.to(data.to[0]).to(data.to[1]).to(data.to[2]).emit('commitReplyR', data);
+		socket.to(data.to[0]).to(data.to[1]).to(data.to[2]).emit('commitReplyR', data);
 	})
 
 	socket.on('requestNoWaitS', () => {
@@ -150,6 +150,6 @@ io.on('connection', function (socket) {
 		data.from = 'replica';
 		data.to = ['client', 'primary'];
 		data.payload = 'Hello World';
-		io.in(data.to[0]).in(data.to[1]).emit('commitReplyNoWaitR', data);
+		socket.to(data.to[0]).to(data.to[1]).emit('commitReplyNoWaitR', data);
 	})
 });

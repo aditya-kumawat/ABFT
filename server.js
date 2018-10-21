@@ -1,7 +1,9 @@
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
-var io = require('socket.io')(server);
+var io = require('socket.io')(server, { origins: '*:*'});
+
+// io.origins('*:*')
 
 server.listen(80);
 
@@ -11,7 +13,7 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/index.html');
 });
 
-var faultyNodes = 3;
+var faultyNodes = 5;
 var totalNodes = 3*faultyNodes + 1;
 var primaryNodes = 1;
 var replicaNodes = 3*faultyNodes;

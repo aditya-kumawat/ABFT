@@ -1,4 +1,6 @@
-var socket = io('http://localhost');
+// var socket = io('http://localhost');
+// var socket = io('http://172.19.17.111');
+var socket = io();
 
 var val = new Set();
 var valNoWait = new Array();
@@ -165,8 +167,8 @@ socket.on('prePrepareNoWaitR', (data) => {
 	data.u = socket.id;
 	if(prePrepareFlag==true && valNoWait.length==2) {
 		prePrepareFlag = false;
-		// socket.emit('commitNoWaitR', data);
-		socket.emit('commitReplyNoWaitR', data);
+		socket.emit('commitNoWaitR', data);
+		// socket.emit('commitReplyNoWaitR', data);
 	}
 })
 

@@ -74,13 +74,14 @@ io.on('connection', function (socket) {
 		var data = {
 			from: ['primary', 'replica'],
 			to: ['primary', 'replica'],
-			payload: "Hello World",
+			// payload: 'Hello World',
+			payload: 1,
 		};
-		io.in(data.from[0]).in(data.from[1]).emit('commitS', data);
+		io.to(data.from[0]).in(data.from[1]).emit('commitS', data);
 	})
 
 	socket.on('commitR', (data) => {
-		io.in(data.to[0]).in(data.to[1]).emit('commitR', data);
+		socket.to(data.to[0]).in(data.to[1]).emit('commitR', data);
 	})
 
 	socket.on('replyS', () => {
@@ -88,7 +89,8 @@ io.on('connection', function (socket) {
 		var data = {
 			from: ['primary', 'replica'],
 			to: 'client',
-			payload: 'Hello World',
+			// payload: 'Hello World',
+			payload: 1,
 			totalNodes: totalNodes,
 		};
 		io.to(data.from[0]).to(data.from[1]).emit('replyS', data);
@@ -103,7 +105,8 @@ io.on('connection', function (socket) {
 		var data = {
 			from: ['primary', 'replica'],
 			to: ['client', 'primary', 'replica'],
-			payload: 'Hello World',
+			// payload: 'Hello World',
+			payload: 1,
 			faultyNodes: faultyNodes,
 		};
 		io.to(data.from[0]).to(data.from[1]).emit('commitReplyS', data);

@@ -118,7 +118,7 @@ socket.on('replyR', (data) => {
 	data.v = socket.id;
 	console.log(data.from + " - " + data.u + " -> " + data.to + " - " + data.v + " --- " + data.payload + " ----- " + (data.rTime - data.sTime));
 
-	if(cData.length==data.totalNodes && cDataSet.size==1) {
+	if(cData.length==2*data.faultyNodes+1 && cDataSet.size==1) {
 		data.fTime = getTime();
 		console.log(data.payload + " ----- " + (data.fTime - data.sTime));
 	}

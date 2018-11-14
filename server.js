@@ -13,7 +13,7 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/index.html');
 });
 
-var faultyNodes = 5;
+var faultyNodes = 4;
 var totalNodes = 3*faultyNodes + 1;
 var primaryNodes = 1;
 var replicaNodes = 3*faultyNodes;
@@ -91,7 +91,8 @@ io.on('connection', function (socket) {
 			to: 'client',
 			// payload: 'Hello World',
 			payload: 1,
-			totalNodes: totalNodes,
+			faultyNodes: faultyNodes,
+			// totalNodes: totalNodes,
 		};
 		io.to(data.from[0]).to(data.from[1]).emit('replyS', data);
 	})
@@ -140,21 +141,24 @@ io.on('connection', function (socket) {
 	socket.on('commitNoWaitR', (data) => {
 		data.from = 'replica';
 		data.to = 'primary';
-		data.payload = 'Hello World';
+		// data.payload = 'Hello World';
+		data.payload = 1;
 		io.in(data.to).emit('commitNoWaitR', data);
 	})
 
 	socket.on('replyNoWaitR', (data) => {
 		data.from = 'primary';
 		data.to = 'client';
-		data.payload = 'Hello World';
+		// data.payload = 'Hello World';
+		data.payload = 1;
 		io.to(data.to).emit('replyNoWaitR', data);
 	})
 
 	socket.on('commitReplyNoWaitR', (data) => {
 		data.from = 'replica';
 		data.to = ['client', 'primary'];
-		data.payload = 'Hello World';
+		// data.payload = 'Hello World';
+		data.payload = 1;
 		socket.to(data.to[0]).to(data.to[1]).emit('commitReplyNoWaitR', data);
 	})
 });
